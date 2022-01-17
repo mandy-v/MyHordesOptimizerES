@@ -23,7 +23,7 @@ namespace MyHordesOptimizerApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<WishListWrapper> GetWishList(string userKey)
+        public ActionResult<WishListWrapperDto> GetWishList(string userKey)
         {
             if (string.IsNullOrWhiteSpace(userKey))
             {
@@ -35,7 +35,7 @@ namespace MyHordesOptimizerApi.Controllers
         }
 
         [HttpPut]
-        public ActionResult<WishListWrapper> PutWishList(string userKey, List<WishListPutResquestDto> request)
+        public ActionResult<WishListWrapperDto> PutWishList(string userKey, List<WishListPutResquestDto> request)
         {
             if (string.IsNullOrWhiteSpace(userKey))
             {

@@ -15,9 +15,9 @@ namespace MyHordesOptimizerApi.Providers.Impl
         private string _userName;
         public string UserName { get => _userName; set => _userName = value; }
 
-        public LastUpdateInfo GenerateLastUpdateInfo()
+        public LastUpdateInfoDto GenerateLastUpdateInfo()
         {
-            return new LastUpdateInfo()
+            return new LastUpdateInfoDto()
             {
                 UserId = UserId,
                 UserName = UserName,

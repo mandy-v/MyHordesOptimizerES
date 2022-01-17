@@ -2,7 +2,7 @@
 
 namespace MyHordesOptimizerApi.Dtos.MyHordesOptimizer
 {
-    public class LastUpdateInfo
+    public class LastUpdateInfoDto
     {
         public string UserId { get; set; }
         public string UserName { get; set; }

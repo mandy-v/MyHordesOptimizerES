@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace MyHordesOptimizerApi.MappingProfiles.Resolvers
 {
-    public class TownCitizensResolver : IValueResolver<MyHordesMap, Town, CitizensWrapper>
+    public class TownCitizensResolver : IValueResolver<MyHordesMap, TownDto, CitizensWrapperDto>
     {
         protected IUserInfoProvider UserInfoProvider { get; set; }
         protected IMapper Mapper { get; set; }
@@ -19,10 +19,10 @@ namespace MyHordesOptimizerApi.MappingProfiles.Resolvers
             Mapper = mapper;
         }
 
-        public CitizensWrapper Resolve(MyHordesMap source, Town destination, CitizensWrapper destMember, ResolutionContext context)
+        public CitizensWrapperDto Resolve(MyHordesMap source, TownDto destination, CitizensWrapperDto destMember, ResolutionContext context)
         {
             var dictionary = source.Citizens.ToDictionary(citizen => citizen.Name, citizen => citizen);
-            var wrapper = new CitizensWrapper(Mapper.Map<Dictionary<string,Citizen>>(dictionary));
+            var wrapper = new CitizensWrapperDto(Mapper.Map<Dictionary<string,CitizenDto>>(dictionary));
             wrapper.LastUpdateInfo = UserInfoProvider.GenerateLastUpdateInfo();
             return wrapper;
         }

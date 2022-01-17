@@ -2,16 +2,16 @@
 
 namespace MyHordesOptimizerApi.Dtos.MyHordesOptimizer
 {
-    public class Town
+    public class TownDto
     {
         public int Id { get; set; }
 
         public MyHordesMap MyHordesMap { get; set; }
 
-        public CitizensWrapper Citizens { get; set; }
+        public CitizensWrapperDto Citizens { get; set; }
 
-        public BankWrapper Bank { get; set; }
+        public BankWrapperDto Bank { get; set; }
 
-        public WishListWrapper WishList { get; set; }
+        public WishListWrapperDto WishList { get; set; }
     }
 }

@@ -23,7 +23,7 @@ using System.Text;
 
 namespace MyHordesOptimizerApi.Repository.Impl
 {
-    public class MyHordesOptimizerFirebaseRepository : AbstractWebApiRepositoryBase, IMyHordesOptimizerFirebaseRepository
+    public class MyHordesOptimizerFirebaseRepository : AbstractWebApiRepositoryBase
     {
         protected IMyHordesOptimizerFirebaseConfiguration Configuration { get; set; }
 
@@ -44,7 +44,7 @@ namespace MyHordesOptimizerApi.Repository.Impl
 
         #region Town
 
-        public void PatchTown(Town town)
+        public void PatchTown(TownDto town)
         {
             var url = $"{Configuration.Url}/{_townCollection}/{town.Id}/{nameof(town.MyHordesMap)}.json";
             url = AddAuthentication(url);
@@ -54,22 +54,22 @@ namespace MyHordesOptimizerApi.Repository.Impl
             PutBank(town.Id, town.Bank);
         }
 
-        public Town GetTown(int townId)
+        public TownDto GetTown(int townId)
         {
             var url = $"{Configuration.Url}/{_townCollection}/{townId}.json";
             url = AddAuthentication(url);
-            return base.Get<Town>(url);
+            return base.Get<TownDto>(url);
         }
 
         #endregion
 
         #region HeroSkill
 
-        public void PatchHeroSkill(IEnumerable<HeroSkill> heroSkills)
+        public void PatchHeroSkill(IEnumerable<HeroSkillDto> heroSkills)
         {
             foreach (var heroSkill in heroSkills)
             {
-                foreach (var prop in typeof(HeroSkill).GetProperties())
+                foreach (var prop in typeof(HeroSkillDto).GetProperties())
                 {
                     var hehe = prop.GetCustomAttributes(typeof(FirebaseIgnoreOnPatch), inherit: true);
                     if (hehe.Length == 0)
@@ -83,11 +83,11 @@ namespace MyHordesOptimizerApi.Repository.Impl
             }
         }
 
-        public Dictionary<string, HeroSkill> GetHeroSkills()
+        public Dictionary<string, HeroSkillDto> GetHeroSkills()
         {
             var url = $"{Configuration.Url}/{_heroSkillCollection}.json";
             url = AddAuthentication(url);
-            return base.Get<Dictionary<string, HeroSkill>>(url);
+            return base.Get<Dictionary<string, HeroSkillDto>>(url);
         }
 
 
@@ -95,7 +95,7 @@ namespace MyHordesOptimizerApi.Repository.Impl
 
         #region Items
 
-        public void PatchItems(List<Item> items)
+        public void PatchItems(List<ItemDto> items)
         {
             foreach (var item in items)
             {
@@ -105,20 +105,20 @@ namespace MyHordesOptimizerApi.Repository.Impl
             }
         }
 
-        public List<Item> GetItems()
+        public List<ItemDto> GetItems()
         {
             var url = $"{Configuration.Url}/{_itemCollection}.json";
             url = AddAuthentication(url);
-            var list = base.Get<List<Item>>(url);
+            var list = base.Get<List<ItemDto>>(url);
             list.RemoveAll(x => x == null);
             return list;
         }
 
-        public Item GetItemsById(int itemId)
+        public ItemDto GetItemsById(int itemId)
         {
             var url = $"{Configuration.Url}/{_itemCollection}/{itemId}.json";
             url = AddAuthentication(url);
-            var item = base.Get<Item>(url);
+            var item = base.Get<ItemDto>(url);
             return item;
         }
 
@@ -126,7 +126,7 @@ namespace MyHordesOptimizerApi.Repository.Impl
 
         #region Recipes
 
-        public void PatchRecipes(List<ItemRecipe> recipes)
+        public void PatchRecipes(List<ItemRecipeDto> recipes)
         {
             foreach (var recipe in recipes)
             {
@@ -136,20 +136,20 @@ namespace MyHordesOptimizerApi.Repository.Impl
             }
         }
 
-        public Dictionary<string, ItemRecipe> GetRecipes()
+        public Dictionary<string, ItemRecipeDto> GetRecipes()
         {
             var url = $"{Configuration.Url}/{_recipeCollection}.json";
             url = AddAuthentication(url);
-            return base.Get<Dictionary<string, ItemRecipe>>(url);
+            return base.Get<Dictionary<string, ItemRecipeDto>>(url);
         }
 
         #endregion
 
         #region Bank
 
-        public void PutBank(int townId, BankWrapper bank)
+        public void PutBank(int townId, BankWrapperDto bank)
         {
-            var url = $"{Configuration.Url}/{_townCollection}/{townId}/{nameof(Town.Bank)}.json";
+            var url = $"{Configuration.Url}/{_townCollection}/{townId}/{nameof(TownDto.Bank)}.json";
             url = AddParameterToQuery(url, "auth", Configuration.Secret);
             base.Put(url: url, body: bank);
         }
@@ -158,9 +158,9 @@ namespace MyHordesOptimizerApi.Repository.Impl
 
         #region WishList
 
-        public void PutWishList(int townId, WishListWrapper wishList)
+        public void PutWishList(int townId, WishListWrapperDto wishList)
         {
-            var url = $"{Configuration.Url}/{_townCollection}/{townId}/{nameof(WishListWrapper.WishList)}.json";
+            var url = $"{Configuration.Url}/{_townCollection}/{townId}/{nameof(WishListWrapperDto.WishList)}.json";
             url = AddParameterToQuery(url, "auth", Configuration.Secret);
             base.Put(url: url, body: wishList);
         }
@@ -169,16 +169,16 @@ namespace MyHordesOptimizerApi.Repository.Impl
 
         #region Citizens
 
-        public void PatchCitizen(int townId, CitizensWrapper wrapper)
+        public void PatchCitizen(int townId, CitizensWrapperDto wrapper)
         {
             foreach (var citizen in wrapper.Citizens)
             {
-                var url = $"{Configuration.Url}/{_townCollection}/{townId}/{nameof(Town.Citizens)}/{nameof(CitizensWrapper.Citizens)}/{citizen.Value.Name}.json";
+                var url = $"{Configuration.Url}/{_townCollection}/{townId}/{nameof(TownDto.Citizens)}/{nameof(CitizensWrapperDto.Citizens)}/{citizen.Value.Name}.json";
                 url = AddParameterToQuery(url, "auth", Configuration.Secret);
                 base.Patch(url: url, body: citizen.Value);
             }
 
-            var urlLastUpdate = $"{Configuration.Url}/{_townCollection}/{townId}/{nameof(Town.Citizens)}/{nameof(CitizensWrapper.LastUpdateInfo)}.json";
+            var urlLastUpdate = $"{Configuration.Url}/{_townCollection}/{townId}/{nameof(TownDto.Citizens)}/{nameof(CitizensWrapperDto.LastUpdateInfo)}.json";
             urlLastUpdate = AddParameterToQuery(urlLastUpdate, "auth", Configuration.Secret);
             base.Patch(url: urlLastUpdate, body: wrapper.LastUpdateInfo);
         }

@@ -1,6 +1,6 @@
 ﻿namespace MyHordesOptimizerApi.Dtos.MyHordesOptimizer
 {
-    public class SimpleMe
+    public class SimpleMeDto
     {
         public int Id { get; set; }
         public int TownId { get; set; }

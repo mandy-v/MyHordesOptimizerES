@@ -6,12 +6,12 @@ namespace MyHordesOptimizerApi.Services.Interfaces
 {
     public interface IMyHordesFetcherService
     {
-        IEnumerable<Item> GetItems();
-        Town GetTown();
-        SimpleMe GetSimpleMe();
-        IEnumerable<HeroSkill> GetHeroSkills();
-        IEnumerable<ItemRecipe> GetRecipes();
-        BankWrapper GetBank();
-        CitizensWrapper GetCitizens();
+        IEnumerable<ItemDto> GetItems();
+        TownDto GetTown();
+        SimpleMeDto GetSimpleMe();
+        IEnumerable<HeroSkillDto> GetHeroSkills();
+        IEnumerable<ItemRecipeDto> GetRecipes();
+        BankWrapperDto GetBank();
+        CitizensWrapperDto GetCitizens();
     }
 }

@@ -5,6 +5,7 @@ using MyHordesOptimizerApi.Dtos.MyHordes.Import.i18n;
 using MyHordesOptimizerApi.Dtos.MyHordes.MyHordesOptimizer;
 using MyHordesOptimizerApi.Dtos.MyHordesOptimizer;
 using MyHordesOptimizerApi.Extensions;
+using MyHordesOptimizerApi.Models;
 using MyHordesOptimizerApi.Repository.Interfaces;
 using MyHordesOptimizerApi.Services.Interfaces.Import;
 using PCRE;
@@ -18,14 +19,14 @@ namespace MyHordesOptimizerApi.Services.Impl.Import
 {
     public class MyHordesImportService : IMyHordesImportService
     {
-        protected readonly IMyHordesOptimizerFirebaseRepository FirebaseRepository;
+        protected readonly IMyHordesOptimizerDatabaseRepository FirebaseRepository;
         protected readonly IWebApiRepository WebApiRepository;
         protected IMyHordesJsonApiRepository MyHordesJsonApiRepository { get; set; }
         protected IMyHordesXmlApiRepository MyHordesXmlApiRepository { get; set; }
         protected readonly IMapper Mapper;
 
 
-        public MyHordesImportService(IMyHordesOptimizerFirebaseRepository firebaseRepository,
+        public MyHordesImportService(IMyHordesOptimizerDatabaseRepository firebaseRepository,
             IWebApiRepository webApiRepository,
             IMyHordesJsonApiRepository myHordesJsonApiRepository,
             IMyHordesXmlApiRepository myHordesXmlApiRepository,
@@ -48,22 +49,22 @@ namespace MyHordesOptimizerApi.Services.Impl.Import
             AddHeroSkillTraduction(request.Es, heroSkills, "es");
             AddHeroSkillTraduction(request.En, heroSkills, "en");
             // Enregistrer dans firebase
-            FirebaseRepository.PatchHeroSkill(heroSkills);
+            FirebaseRepository.PatchHeroSkill(Mapper.Map<List<HeroSkillModel>>(heroSkills));
         }
 
-        private void AddHeroSkillTraduction(string url, List<HeroSkill> heroSkillsWithoutTrad, string locale)
+        private void AddHeroSkillTraduction(string url, List<HeroSkillDto> heroSkillsWithoutTrad, string locale)
         {
             var translationFile = WebApiRepository.Get<TranslationFileDto>(url: url, mediaTypeOut: MediaTypeNames.Application.Xml);
             foreach (var heroSkill in heroSkillsWithoutTrad)
             {
-                var descriptionUnit = translationFile.File.Unit.First(unit => unit.Segment.Source == heroSkill.Description[HeroSkill.DefaultLocale]);
+                var descriptionUnit = translationFile.File.Unit.First(unit => unit.Segment.Source == heroSkill.Description[HeroSkillDto.DefaultLocale]);
                 heroSkill.Description[locale] = descriptionUnit.Segment.Target;
-                var labelUnit = translationFile.File.Unit.First(unit => unit.Segment.Source == heroSkill.Label[HeroSkill.DefaultLocale]);
+                var labelUnit = translationFile.File.Unit.First(unit => unit.Segment.Source == heroSkill.Label[HeroSkillDto.DefaultLocale]);
                 heroSkill.Label[locale] = labelUnit.Segment.Target;
             }
         }
 
-        private IEnumerable<HeroSkill> GetHeroSkillInDeutch(string heroSkillStr)
+        private IEnumerable<HeroSkillDto> GetHeroSkillInDeutch(string heroSkillStr)
         {
             heroSkillStr = RemoveComments(heroSkillStr);
             var heroSkillStrSplit = Regex.Split(heroSkillStr, "\\n");
@@ -90,7 +91,7 @@ namespace MyHordesOptimizerApi.Services.Impl.Import
 
             foreach (var workingHeroSkill in listOfDictionnary)
             {
-                var heroSkill = new HeroSkill();
+                var heroSkill = new HeroSkillDto();
                 heroSkill.Name = workingHeroSkill["name"];
                 heroSkill.Label["de"] = workingHeroSkill["title"];
                 heroSkill.Description["de"] = workingHeroSkill["description"];
@@ -107,23 +108,23 @@ namespace MyHordesOptimizerApi.Services.Impl.Import
         public void ImportItems(ImportItemsRequestDto request)
         {
             var items = GetItemFromMyHordesApis();
-            ParseItemInfo(request.ItemsProperties, items, nameof(Item.Properties));
-            ParseItemInfo(request.ItemActions, items, nameof(Item.Actions));
+            ParseItemInfo(request.ItemsProperties, items, nameof(ItemDto.Properties));
+            ParseItemInfo(request.ItemActions, items, nameof(ItemDto.Actions));
             // Traductions
             var translationFileFr = WebApiRepository.Get<TranslationFileDto>(url: request.Fr, mediaTypeOut: MediaTypeNames.Application.Xml);
             var translationFileEn = WebApiRepository.Get<TranslationFileDto>(url: request.En, mediaTypeOut: MediaTypeNames.Application.Xml);
             var translationFileEs = WebApiRepository.Get<TranslationFileDto>(url: request.Es, mediaTypeOut: MediaTypeNames.Application.Xml);
-            GetTranslationFromTarget(items: items, translationFile: translationFileFr, targetLocale: "fr", "de", nameof(Item.Description));
-            GetTranslationFromSource(items: items, translationFile: translationFileEn, targetLocale: "en", "de", nameof(Item.Description));
-            GetTranslationFromSource(items: items, translationFile: translationFileEs, targetLocale: "es", "de", nameof(Item.Description));
+            GetTranslationFromTarget(items: items, translationFile: translationFileFr, targetLocale: "fr", "de", nameof(ItemDto.Description));
+            GetTranslationFromSource(items: items, translationFile: translationFileEn, targetLocale: "en", "de", nameof(ItemDto.Description));
+            GetTranslationFromSource(items: items, translationFile: translationFileEs, targetLocale: "es", "de", nameof(ItemDto.Description));
             // Enregistrer dans firebase
-            FirebaseRepository.PatchItems(items);
+            FirebaseRepository.PatchItems(Mapper.Map<List<ItemModel>>(items));
 
             // Gestion des recipes
             var recipeStr = RemoveComments(request.Recipes);
             var recipesLine = Regex.Split(recipeStr, "\\n");
-            var recipes = new List<ItemRecipe>();
-            var firebaseItems = FirebaseRepository.GetItems().ToList();
+            var recipes = new List<ItemRecipeDto>();
+            var firebaseItems = Mapper.Map<List<ItemDto>>(FirebaseRepository.GetItems().ToList());
             foreach (var line in recipesLine)
             {
                 if (!string.IsNullOrWhiteSpace(line))
@@ -143,7 +144,7 @@ namespace MyHordesOptimizerApi.Services.Impl.Import
                     var @out = dico["out"];
                     dico.TryGetValue("action", out var action);
 
-                    var recipe = new ItemRecipe();
+                    var recipe = new ItemRecipeDto();
                     recipe.Name = recipeName;
                     switch (type)
                     {
@@ -219,14 +220,14 @@ namespace MyHordesOptimizerApi.Services.Impl.Import
             //
 
             // On ajoute les traduction
-            GetTranslationFromSource(items: recipes, translationFile: translationFileFr, targetLocale: "fr", "de", nameof(ItemRecipe.Actions));
-            GetTranslationFromSource(items: recipes, translationFile: translationFileEn, targetLocale: "en", "de", nameof(ItemRecipe.Actions));
-            GetTranslationFromSource(items: recipes, translationFile: translationFileEs, targetLocale: "es", "de", nameof(ItemRecipe.Actions));
+            GetTranslationFromSource(items: recipes, translationFile: translationFileFr, targetLocale: "fr", "de", nameof(ItemRecipeDto.Actions));
+            GetTranslationFromSource(items: recipes, translationFile: translationFileEn, targetLocale: "en", "de", nameof(ItemRecipeDto.Actions));
+            GetTranslationFromSource(items: recipes, translationFile: translationFileEs, targetLocale: "es", "de", nameof(ItemRecipeDto.Actions));
 
-            FirebaseRepository.PatchRecipes(recipes);
+            FirebaseRepository.PatchRecipes(Mapper.Map<List<RecipeModel>>(recipes));
         }
 
-        private static void ParseItemInfo(string strToParse, List<Item> items, string propertieName)
+        private static void ParseItemInfo(string strToParse, List<ItemDto> items, string propertieName)
         {
             strToParse = RemoveComments(strToParse);
             var strSplit = Regex.Split(strToParse, "\\n");
@@ -247,22 +248,22 @@ namespace MyHordesOptimizerApi.Services.Impl.Import
                             list.Add(propertieValue);
                         }
                     }
-                    Item item = items.FirstOrDefault(item => item.JsonIdName == key);
+                    ItemDto item = items.FirstOrDefault(item => item.JsonIdName == key);
                     if (item != null)
                     {
-                        typeof(Item).GetProperty(propertieName).SetValue(item, list);
+                        typeof(ItemDto).GetProperty(propertieName).SetValue(item, list);
                     }
                 }
             }
         }
 
-        private List<Item> GetItemFromMyHordesApis()
+        private List<ItemDto> GetItemFromMyHordesApis()
         {
             var jsonApiResult = MyHordesJsonApiRepository.GetItems();
-            var jsonItems = Mapper.Map<List<Item>>(jsonApiResult);
+            var jsonItems = Mapper.Map<List<ItemDto>>(jsonApiResult);
 
             var xmlApiResult = MyHordesXmlApiRepository.GetItems();
-            var xmlItems = Mapper.Map<List<Item>>(xmlApiResult.Data.Items.Item);
+            var xmlItems = Mapper.Map<List<ItemDto>>(xmlApiResult.Data.Items.Item);
 
             foreach (var item in xmlItems)
             {

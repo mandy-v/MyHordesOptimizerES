@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MyHordesOptimizerApi.Dtos.MyHordes.MyHordesOptimizer
 {
-    public class Item
+    public class ItemDto
     {
         public string JsonIdName { get; set; }
         public string Img { get; set; }
@@ -20,16 +20,16 @@ namespace MyHordesOptimizerApi.Dtos.MyHordes.MyHordesOptimizer
         public IEnumerable<string> Properties { get; set; }
         public IEnumerable<string> Actions { get; set; }
         [FirebaseSerializeIgnore]
-        public List<ItemRecipe> Recipes { get; set; }
+        public List<ItemRecipeDto> Recipes { get; set; }
         [FirebaseSerializeIgnore]
         public int WishListCount { get; set; }
         [FirebaseSerializeIgnore]
         public int BankCount { get; set; }
 
-        public Item()
+        public ItemDto()
         {
             Description = new Dictionary<string, string>();
-            Recipes = new List<ItemRecipe>();
+            Recipes = new List<ItemRecipeDto>();
         }
     }
 
@@ -37,6 +37,6 @@ namespace MyHordesOptimizerApi.Dtos.MyHordes.MyHordesOptimizer
     {
         public double Probability { get; set; }
         public int Weight { get; set; }
-        public Item Item { get; set; }
+        public ItemDto Item { get; set; }
     }
 }

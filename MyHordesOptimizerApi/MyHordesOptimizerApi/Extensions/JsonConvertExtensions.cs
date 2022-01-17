@@ -22,6 +22,11 @@ namespace MyHordesOptimizerApi.Extensions
         {
             return JsonConvert.DeserializeObject<T>(jsonString);
         }
+
+        public static T Clone<T>(this T obj)
+        {
+            return obj.ToJson().FromJson<T>();
+        }
     }
 
     public class FirebaseIgnoreResolver : DefaultContractResolver

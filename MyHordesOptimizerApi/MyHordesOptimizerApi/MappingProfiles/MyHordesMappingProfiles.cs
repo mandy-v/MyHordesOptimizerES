@@ -13,7 +13,7 @@ namespace MyHordesOptimizerApi.MappingProfiles
     {
         public MyHordesMappingProfiles()
         {
-            CreateMap<KeyValuePair<string, MyHordesJsonItem>, Item>()
+            CreateMap<KeyValuePair<string, MyHordesJsonItem>, ItemDto>()
                 .ForMember(dest => dest.JsonIdName, opt => opt.MapFrom(src => src.Key))
                 .ForMember(dest => dest.Img, opt => opt.MapFrom(src => src.Value.Img))
                 .ForMember(dest => dest.Label, opt => opt.MapFrom(src => src.Value.Name))
@@ -25,7 +25,7 @@ namespace MyHordesOptimizerApi.MappingProfiles
                 .ForMember(dest => dest.XmlId, opt => opt.Ignore())
                 .ForMember(dest => dest.XmlName, opt => opt.Ignore());
 
-            CreateMap<MyHordesXmlApiItemDto, Item>()
+            CreateMap<MyHordesXmlApiItemDto, ItemDto>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Cat))
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => new Dictionary<string, string>() { { "fr", src.Text } }))
                 .ForMember(dest => dest.Deco, opt => opt.MapFrom(src => src.Deco))
@@ -37,17 +37,17 @@ namespace MyHordesOptimizerApi.MappingProfiles
                 .ForMember(dest => dest.JsonIdName, opt => opt.Ignore())
                 .ForMember(dest => dest.Label, opt => opt.Ignore());
 
-            CreateMap<MyHordesMap, Town>()
+            CreateMap<MyHordesMap, TownDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.MyHordesMap, opt => opt.MapFrom(src => src))
                 //.ForMember(dest => dest.Citizens, opt => opt.MapFrom(src => src.Citizens.ToDictionary(citizen => citizen.Name, citizen => citizen)))
                 .ForMember(dest => dest.Citizens, opt => opt.MapFrom<TownCitizensResolver>())
                 .ForMember(dest => dest.Bank, opt => opt.MapFrom<TownBankResolver>());
 
-            CreateMap<MyHordesCitizen, Citizen>()
+            CreateMap<MyHordesCitizen, CitizenDto>()
                 .ForMember(dest => dest.NombreJourHero, opt => opt.Ignore());
 
-            CreateMap<MyHordesMeResponseDto, SimpleMe>()
+            CreateMap<MyHordesMeResponseDto, SimpleMeDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.TownId, opt => { opt.MapFrom(src => src.Map.Id); opt.Condition(src => src.Map != null); });
         }

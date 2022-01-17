@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using MyHordesOptimizerApi.Dtos.MyHordes.MyHordesOptimizer;
 using MyHordesOptimizerApi.Dtos.MyHordesOptimizer;
+using MyHordesOptimizerApi.Models;
 using MyHordesOptimizerApi.Providers.Interfaces;
 using MyHordesOptimizerApi.Repository.Interfaces;
 using MyHordesOptimizerApi.Services.Interfaces;
@@ -15,7 +16,7 @@ namespace MyHordesOptimizerApi.Services.Impl
         protected ILogger<MyHordesFetcherService> Logger { get; set; }
         protected IMyHordesJsonApiRepository MyHordesJsonApiRepository { get; set; }
         protected IMyHordesXmlApiRepository MyHordesXmlApiRepository { get; set; }
-        protected IMyHordesOptimizerFirebaseRepository FirebaseRepository { get; set; }
+        protected IMyHordesOptimizerDatabaseRepository DatabaseRepository { get; set; }
         protected readonly IMapper Mapper;
         protected IUserInfoProvider UserInfoProvider { get; set; }
 
@@ -23,22 +24,23 @@ namespace MyHordesOptimizerApi.Services.Impl
         public MyHordesFetcherService(ILogger<MyHordesFetcherService> logger,
             IMyHordesJsonApiRepository myHordesJsonApiRepository,
             IMyHordesXmlApiRepository myHordesXmlApiRepository,
-            IMyHordesOptimizerFirebaseRepository firebaseRepository,
+            IMyHordesOptimizerDatabaseRepository firebaseRepository,
             IMapper mapper,
             IUserInfoProvider userInfoProvider)
         {
             Logger = logger;
             MyHordesJsonApiRepository = myHordesJsonApiRepository;
             MyHordesXmlApiRepository = myHordesXmlApiRepository;
-            FirebaseRepository = firebaseRepository;
+            DatabaseRepository = firebaseRepository;
             Mapper = mapper;
             UserInfoProvider = userInfoProvider;
         }
 
-        public IEnumerable<Item> GetItems()
+        public IEnumerable<ItemDto> GetItems()
         {
-            var items = FirebaseRepository.GetItems();
-            var recipes = FirebaseRepository.GetRecipes();
+            var items = Mapper.Map<List<ItemDto>>(DatabaseRepository.GetItems());
+            var recipes = Mapper.Map<Dictionary<string, ItemRecipeDto>>(DatabaseRepository.GetRecipes());
+
             foreach (var item in items)
             {
                 var recipesToAdd = recipes.Values.Where(recipe => recipe.Components.Any(component => component.XmlId == item.XmlId)).ToList();
@@ -49,7 +51,7 @@ namespace MyHordesOptimizerApi.Services.Impl
             var me = MyHordesJsonApiRepository.GetMe();
             if (me.Map != null) // On ne récupère les info propres à la ville uniquement si on est incarné
             {
-                var town = FirebaseRepository.GetTown(me.Map.Id);
+                var town = Mapper.Map<TownDto>(DatabaseRepository.GetTown(me.Map.Id));
 
                 foreach (var item in items)
                 {
@@ -78,47 +80,57 @@ namespace MyHordesOptimizerApi.Services.Impl
             return items;
         }
 
-        public Town GetTown()
+        public TownDto GetTown()
         {
             var myHordeMeResponse = MyHordesJsonApiRepository.GetMe();
             myHordeMeResponse.Map.LastUpdateInfo = UserInfoProvider.GenerateLastUpdateInfo();
-            var town = Mapper.Map<Town>(myHordeMeResponse.Map);
+            var townDto = Mapper.Map<TownDto>(myHordeMeResponse.Map);
 
             // Enregistrer en base
-            FirebaseRepository.PatchTown(town);
-            town = FirebaseRepository.GetTown(town.Id);
+            var townModel = Mapper.Map<TownModel>(townDto);
+            DatabaseRepository.PatchTown(townModel);
+            townDto = Mapper.Map<TownDto>(DatabaseRepository.GetTown(townDto.Id));
 
-            return town;
+            return townDto;
         }
 
-        public SimpleMe GetSimpleMe()
+        public SimpleMeDto GetSimpleMe()
         {
             var me = MyHordesJsonApiRepository.GetMe();
-            var simpleMe = Mapper.Map<SimpleMe>(me);
+            var simpleMe = Mapper.Map<SimpleMeDto>(me);
+
+            var citizen = new CitizenModel()
+            {
+                Name = me.Name,
+                UserId = me.Id,
+                UserKey = UserInfoProvider.UserKey
+            };
+            DatabaseRepository.PatchCitizen(citizen);
 
             return simpleMe;
         }
 
-        public IEnumerable<HeroSkill> GetHeroSkills()
+        public IEnumerable<HeroSkillDto> GetHeroSkills()
         {
-            var heroSkills = FirebaseRepository.GetHeroSkills();
-            return heroSkills.Values;
+            var heroSkills = Mapper.Map<List<HeroSkillDto>>(DatabaseRepository.GetHeroSkills());
+            return heroSkills;
         }
 
-        public IEnumerable<ItemRecipe> GetRecipes()
+        public IEnumerable<ItemRecipeDto> GetRecipes()
         {
-            var recipes = FirebaseRepository.GetRecipes();
-            return recipes.Values;
+            var recipes = Mapper.Map<List<ItemRecipeDto>>(DatabaseRepository.GetRecipes());
+            return recipes;
         }
 
-        public BankWrapper GetBank()
+        public BankWrapperDto GetBank()
         {
             var myHordeMeResponse = MyHordesJsonApiRepository.GetMe();
-            var town = Mapper.Map<Town>(myHordeMeResponse.Map);
+            var town = Mapper.Map<TownDto>(myHordeMeResponse.Map);
 
             // Enregistrer en base
-            FirebaseRepository.PutBank(town.Id, town.Bank);
-            town = FirebaseRepository.GetTown(town.Id);
+            var bankModel = Mapper.Map<BankModel>(town.Bank);
+            DatabaseRepository.PutBank(town.Id, bankModel);
+            town = Mapper.Map<TownDto>(DatabaseRepository.GetTown(town.Id));
             var bankWrapper = town.Bank;
 
             if (town.WishList != null && town.WishList.WishList != null)
@@ -139,14 +151,14 @@ namespace MyHordesOptimizerApi.Services.Impl
             return bankWrapper;
         }
 
-        public CitizensWrapper GetCitizens()
+        public CitizensWrapperDto GetCitizens()
         {
             var myHordeMeResponse = MyHordesJsonApiRepository.GetMe();
-            var town = Mapper.Map<Town>(myHordeMeResponse.Map);
+            var town = Mapper.Map<TownDto>(myHordeMeResponse.Map);
 
             // Enregistrer en base
-            FirebaseRepository.PatchCitizen(town.Id, town.Citizens);
-            town = FirebaseRepository.GetTown(town.Id);
+            DatabaseRepository.PatchCitizen(town.Id, Mapper.Map<List<CitizenModel>>(town.Citizens));
+            town = Mapper.Map<TownDto>(DatabaseRepository.GetTown(town.Id));
             var citizens = town.Citizens;
 
             return citizens;

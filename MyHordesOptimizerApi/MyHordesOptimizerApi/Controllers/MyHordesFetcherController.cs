@@ -26,7 +26,7 @@ namespace MyHordesOptimizerApi.Controllers
 
         [HttpGet]
         [Route("Town")]
-        public ActionResult<Town> GetTown(string userKey)
+        public ActionResult<TownDto> GetTown(string userKey)
         {
             if (string.IsNullOrWhiteSpace(userKey))
             {
@@ -39,7 +39,7 @@ namespace MyHordesOptimizerApi.Controllers
 
         [HttpGet]
         [Route("Items")]
-        public ActionResult<IEnumerable<Item>> GetItems(string userKey)
+        public ActionResult<IEnumerable<ItemDto>> GetItems(string userKey)
         {
             if (string.IsNullOrWhiteSpace(userKey))
             {
@@ -52,7 +52,7 @@ namespace MyHordesOptimizerApi.Controllers
 
         [HttpGet]
         [Route("Me")]
-        public ActionResult<SimpleMe> GetMe(string userKey)
+        public ActionResult<SimpleMeDto> GetMe(string userKey)
         {
             if (string.IsNullOrWhiteSpace(userKey))
             {
@@ -65,7 +65,7 @@ namespace MyHordesOptimizerApi.Controllers
 
         [HttpGet]
         [Route("HeroSkills")]
-        public ActionResult<IEnumerable<HeroSkill>> GetHeroSkills()
+        public ActionResult<IEnumerable<HeroSkillDto>> GetHeroSkills()
         {      
             var heroSkills = _myHordesFetcherService.GetHeroSkills().ToList();
             return heroSkills;
@@ -73,7 +73,7 @@ namespace MyHordesOptimizerApi.Controllers
 
         [HttpGet]
         [Route("Recipes")]
-        public ActionResult<IEnumerable<ItemRecipe>> GetRecipes()
+        public ActionResult<IEnumerable<ItemRecipeDto>> GetRecipes()
         {
             var heroSkills = _myHordesFetcherService.GetRecipes().ToList();
             return heroSkills;
@@ -81,7 +81,7 @@ namespace MyHordesOptimizerApi.Controllers
 
         [HttpGet]
         [Route("Bank")]
-        public ActionResult<BankWrapper> GetBank(string userKey)
+        public ActionResult<BankWrapperDto> GetBank(string userKey)
         {
             if (string.IsNullOrWhiteSpace(userKey))
             {
@@ -95,7 +95,7 @@ namespace MyHordesOptimizerApi.Controllers
 
         [HttpGet]
         [Route("Citizens")]
-        public ActionResult<CitizensWrapper> GetCitizens(string userKey)
+        public ActionResult<CitizensWrapperDto> GetCitizens(string userKey)
         {
             if (string.IsNullOrWhiteSpace(userKey))
             {

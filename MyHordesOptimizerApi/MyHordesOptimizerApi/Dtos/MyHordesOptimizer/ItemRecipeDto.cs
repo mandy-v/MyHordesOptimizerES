@@ -4,19 +4,19 @@ using System.ComponentModel;
 
 namespace MyHordesOptimizerApi.Dtos.MyHordesOptimizer
 {
-    public class ItemRecipe
+    public class ItemRecipeDto
     {
         public string Name { get; set; }
         public string Type { get; set; }
         public bool IsShamanOnly { get; set; }
         public List<ItemResult> Result { get; set; }
-        public List<Item> Components { get; set; }
+        public List<ItemDto> Components { get; set; }
         public IDictionary<string, string> Actions { get; set; }
 
-        public ItemRecipe()
+        public ItemRecipeDto()
         {
             Actions = new Dictionary<string, string>();
-            Components = new List<Item>();
+            Components = new List<ItemDto>();
             Result = new List<ItemResult>();
         }
     }

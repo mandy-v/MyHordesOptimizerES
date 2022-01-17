@@ -2,7 +2,7 @@
 
 namespace MyHordesOptimizerApi.Dtos.MyHordesOptimizer
 {
-    public class Citizen
+    public class CitizenDto
     {
         #region MyHordes
 

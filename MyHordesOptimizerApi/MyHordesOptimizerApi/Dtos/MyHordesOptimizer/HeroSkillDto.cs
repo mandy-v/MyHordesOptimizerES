@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MyHordesOptimizerApi.Dtos.MyHordesOptimizer
 {
-    public class HeroSkill
+    public class HeroSkillDto
     {
         public const string DefaultLocale = "de";
 
@@ -15,7 +15,7 @@ namespace MyHordesOptimizerApi.Dtos.MyHordesOptimizer
         public int NbUses { get; set; }
         public int DaysNeeded { get; set; }
 
-        public HeroSkill()
+        public HeroSkillDto()
         {
             Description = new Dictionary<string, string>();
             Label = new Dictionary<string, string>();

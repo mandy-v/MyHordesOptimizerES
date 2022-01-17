@@ -1,33 +1,37 @@
 ﻿using AutoMapper;
 using MyHordesOptimizerApi.Dtos.MyHordes;
+using MyHordesOptimizerApi.Dtos.MyHordes.MyHordesOptimizer;
 using MyHordesOptimizerApi.Dtos.MyHordesOptimizer;
 using MyHordesOptimizerApi.Providers.Interfaces;
 using MyHordesOptimizerApi.Repository.Interfaces;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MyHordesOptimizerApi.MappingProfiles.Resolvers
 {
-    public class TownBankResolver : IValueResolver<MyHordesMap, Town, BankWrapper>
+    public class TownBankResolver : IValueResolver<MyHordesMap, TownDto, BankWrapperDto>
     {
-        protected IMyHordesOptimizerFirebaseRepository FirebaseRepository { get; set; }
+        protected IMyHordesOptimizerDatabaseRepository FirebaseRepository { get; set; }
         protected IUserInfoProvider UserInfoProvider { get; set; }
+        protected IMapper Mapper { get; set; }
 
-
-        public TownBankResolver(IMyHordesOptimizerFirebaseRepository firebaseRepository,
-            IUserInfoProvider userInfoProvider)
+        public TownBankResolver(IMyHordesOptimizerDatabaseRepository firebaseRepository,
+            IUserInfoProvider userInfoProvider,
+            IMapper mapper)
         {
             FirebaseRepository = firebaseRepository;
             UserInfoProvider = userInfoProvider;
+            Mapper = Mapper;
         }
 
-        public BankWrapper Resolve(MyHordesMap source, Town destination, BankWrapper destMember, ResolutionContext context)
+        public BankWrapperDto Resolve(MyHordesMap source, TownDto destination, BankWrapperDto destMember, ResolutionContext context)
         {
-            var wrapper = new BankWrapper();
-            var items = FirebaseRepository.GetItems();
+            var wrapper = new BankWrapperDto();
+            var items = Mapper.Map<List<ItemDto>>(FirebaseRepository.GetItems());
             foreach (var bankItem in source.City.Bank)
             {
                 var item = items.First(x => x.XmlId == bankItem.Id);
-                var destinationBankItem = new BankItem()
+                var destinationBankItem = new BankItemDto()
                 {
                     Item = item,
                     Count = bankItem.Count

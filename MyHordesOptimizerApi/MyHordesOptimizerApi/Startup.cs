@@ -3,6 +3,7 @@ using Common.Core.Repository.Impl;
 using Common.Core.Repository.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +11,7 @@ using MyHordesOptimizerApi.Configuration.Impl;
 using MyHordesOptimizerApi.Configuration.Impl.ExternalTools;
 using MyHordesOptimizerApi.Configuration.Interfaces;
 using MyHordesOptimizerApi.Configuration.Interfaces.ExternalTools;
+using MyHordesOptimizerApi.Database;
 using MyHordesOptimizerApi.MappingProfiles;
 using MyHordesOptimizerApi.Providers.Impl;
 using MyHordesOptimizerApi.Providers.Interfaces;
@@ -54,7 +56,11 @@ namespace MyHordesOptimizerApi
                     UseCookies = false,
                 };
             });
-           // services.AddSingleton(BuildAutoMapper());
+
+            services.AddDbContext<MyHordesOptimizerContext>(options =>
+               options.UseSqlServer(Configuration.GetSection("Database").GetValue<string>("ConnectionString")));
+
+            // services.AddSingleton(BuildAutoMapper());
             services.AddAutoMapper(Assembly.GetAssembly(this.GetType()));
 
             // Providers
@@ -78,7 +84,7 @@ namespace MyHordesOptimizerApi
             services.AddScoped<IFataMorganaRepository, FataMorganaRepository>();
             services.AddScoped<IGestHordesRepository, GestHordesRepository>();
 
-            services.AddScoped<IMyHordesOptimizerFirebaseRepository, MyHordesOptimizerFirebaseRepository>();
+            services.AddScoped<IMyHordesOptimizerDatabaseRepository, MyHordesOptimizerSqlServerRepository>();
 
             // Services
             services.AddScoped<IMyHordesFetcherService, MyHordesFetcherService>();
